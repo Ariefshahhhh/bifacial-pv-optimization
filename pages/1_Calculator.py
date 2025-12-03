@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.title("⚡ PV Output Power Calculator")
+st.title("⚡ PV Output Power Computation Tool")
 st.markdown("Calculate bifacial PV power output with complete correction factors.")
 st.markdown("---")
 
@@ -43,3 +43,4 @@ if st.button("Calculate Output Power"):
     st.session_state["irr_total"] = irr_total
     st.session_state["temp_factor"] = temp_factor
     st.session_state["Pmax_stc"] = Pmax_stc
+
