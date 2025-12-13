@@ -17,9 +17,9 @@ with col1:
     Tcell = st.number_input("Cell Temperature (°C)", value=30.0)
 
 with col2:
-    gammaP = st.number_input("γ (Power Temp Coefficient) [%/°C]", value=-0.350, format="%.3f")
-    gammaVoc = st.number_input("γVoc (Voc Temp Coefficient) [%/°C]", value=-0.250, format="%.3f")
-    gammaIsc = st.number_input("γIsc (Isc Temp Coefficient) [%/°C]", value=0.040, format="%.3f")
+    gammaP = st.number_input("γPmax (Power Temp Coefficient) [%/°C]", value=-0.350, format="%.3f")
+    gammaVoc = st.number_input("βVoc (Voc Temp Coefficient) [%/°C]", value=-0.250, format="%.3f")
+    gammaIsc = st.number_input("αIsc (Isc Temp Coefficient) [%/°C]", value=0.040, format="%.3f")
 
     Fmm = st.number_input("Mismatch Factor (Fmm)", value=0.980, min_value=0.800, max_value=1.000, step=0.001, format="%.3f")
     Fage = st.number_input("Aging Factor (Fage)", value=0.950, min_value=0.800, max_value=1.000, step=0.001, format="%.3f")
@@ -65,3 +65,4 @@ if st.button("Calculate Parameters"):
     st.session_state["Isc"] = Isc_temp
     st.session_state["Vmp"] = Vmp
     st.session_state["Imp"] = Imp
+
