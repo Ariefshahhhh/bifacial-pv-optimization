@@ -2,17 +2,16 @@ import streamlit as st
 
 st.title("⚡ Bifacial PV Output Computation Tool")
 st.markdown(
-    "Compute **Pout, Vmp, Imp, Voc, and Isc** using manual equations with "
-    "temperature coefficients and loss factors."
+    "Compute **Output Power**, **Voltage at Maximum Power**, "
+    "**Current at Maximum Power**, **Open-Circuit Voltage**, "
+    "and **Short-Circuit Current** with temperature correction and loss factors."
 )
 st.markdown("---")
 
-# =========================
-# INPUT LAYOUT
-# =========================
+# ================= LAYOUT =================
 col1, col2 = st.columns(2)
 
-# ---------- LEFT COLUMN ----------
+# ---------- LEFT SIDE ----------
 with col1:
     st.subheader("🔆 Environmental Inputs")
 
@@ -21,64 +20,49 @@ with col1:
     Tcell = st.number_input("Cell Temperature (°C)", value=30.0)
 
     st.subheader("📦 Module STC Electrical Data")
+    Pmax_stc = st.number_input("Maximum Power at STC (W)", value=450.0)
+    Vmp_stc = st.number_input("Voltage at Maximum Power at STC (V)", value=41.0, step=0.1)
+    Imp_stc = st.number_input("Current at Maximum Power at STC (A)", value=10.98, step=0.01)
+    Voc_stc = st.number_input("Open-Circuit Voltage at STC (V)", value=49.5, step=0.1)
+    Isc_stc = st.number_input("Short-Circuit Current at STC (A)", value=11.50, step=0.01)
 
-    Pmax_stc = st.number_input("Pmax at STC (W)", value=450.0)
-    Vmp_stc = st.number_input("Vmp at STC (V)", value=41.0, step=0.1)
-    Imp_stc = st.number_input("Imp at STC (A)", value=10.98, step=0.01)
-    Voc_stc = st.number_input("Voc at STC (V)", value=49.5, step=0.1)
-    Isc_stc = st.number_input("Isc at STC (A)", value=11.50, step=0.01)
-
-# ---------- RIGHT COLUMN ----------
+# ---------- RIGHT SIDE ----------
 with col2:
     st.subheader("🌡 Temperature Coefficients")
 
     alpha = st.number_input(
-        "α (Isc Temperature Coefficient, 1/°C)",
-        value=0.040,
-        format="%.3f"
+        "α (Short-Circuit Current Temperature Coefficient, 1/°C)",
+        value=0.040, format="%.3f"
     )
     beta = st.number_input(
         "β (Voltage Temperature Coefficient, 1/°C)",
-        value=-0.280,
-        format="%.3f"
+        value=-0.280, format="%.3f"
     )
     gamma = st.number_input(
-        "γ (Power Temperature Coefficient, 1/°C)",
-        value=-0.350,
-        format="%.3f"
+        "γ (Maximum Power Temperature Coefficient, 1/°C)",
+        value=-0.350, format="%.3f"
     )
 
-    st.subheader("⚙ Loss / Correction Factors")
-
+    st.subheader("⚙ Correction Factors")
     Fmm = st.number_input("Mismatch Factor (Fmm)", value=0.98, min_value=0.80, max_value=1.00, step=0.01)
     Fage = st.number_input("Aging Factor (Fage)", value=0.95, min_value=0.80, max_value=1.00, step=0.01)
     Fg = st.number_input("Glass / Soiling Factor (Fg)", value=0.97, min_value=0.80, max_value=1.00, step=0.01)
     Fclean = st.number_input("Cleaning Factor (Fclean)", value=0.98, min_value=0.80, max_value=1.00, step=0.01)
-    Fshade = st.number_input("Shading Factor (Fshade)", value=1.00, min_value=0.80, max_value=1.00, step=0.01)
+    Fshade = st.number_input("Shading Factor (Fshade)", value=0.95, min_value=0.80, max_value=1.00, step=0.01)
 
-# =========================
-# CALCULATION
-# =========================
-if st.button("Calculate Outputs"):
-    st.markdown("---")
+# ================= CALCULATION =================
+if st.button("Calculate Electrical Outputs"):
 
-    # Total irradiance
     G_total = G_front + G_rear
 
-    # ---- Temperature correction factors ----
-    f_temp_I = 1 + alpha * (Tcell - 25)
-    f_temp_V = 1 + beta * (Tcell - 25)
-    f_temp_P = 1 + gamma * (Tcell - 25)
+    # ---- Temperature corrections ----
+    Short_Circuit_Current = Isc_stc * (1 + alpha * (Tcell - 25))
+    Open_Circuit_Voltage = Voc_stc * (1 + beta * (Tcell - 25))
+    Maximum_Power_Temp = Pmax_stc * (1 + gamma * (Tcell - 25))
 
-    # ---- Electrical outputs ----
-    Isc_T = Isc_stc * f_temp_I
-    Voc_T = Voc_stc * f_temp_V
-    Vmp_T = Vmp_stc * f_temp_V
-    Pmax_T = Pmax_stc * f_temp_P
-
-    # ---- Output power ----
-    Pout = (
-        Pmax_T *
+    # ---- Output Power Calculation ----
+    Output_Power = (
+        Maximum_Power_Temp *
         (G_total / 1000) *
         Fmm *
         Fage *
@@ -87,34 +71,35 @@ if st.button("Calculate Outputs"):
         Fshade
     )
 
-    # ---- Current at maximum power ----
-    Imp_T = Pout / Vmp_T if Vmp_T != 0 else 0
+    # ---- Voltage & Current at Maximum Power ----
+    Voltage_at_Maximum_Power = Vmp_stc * (1 + beta * (Tcell - 25))
+    Current_at_Maximum_Power = (
+        Output_Power / Voltage_at_Maximum_Power
+        if Voltage_at_Maximum_Power != 0 else 0
+    )
 
-    # =========================
-    # DISPLAY RESULTS
-    # =========================
+    # ================= OUTPUT DISPLAY =================
+    st.markdown("---")
     st.subheader("📊 Calculated Electrical Outputs")
 
     colA, colB = st.columns(2)
 
     with colA:
-        st.success(f"**Pout** = {Pout:.2f} W")
-        st.success(f"**Vmp** = {Vmp_T:.2f} V")
-        st.success(f"**Voc** = {Voc_T:.2f} V")
+        st.success(f"**Output Power (Pₒᵤₜ)** = {Output_Power:.2f} W")
+        st.success(f"**Voltage at Maximum Power (Vₘₚ)** = {Voltage_at_Maximum_Power:.2f} V")
+        st.success(f"**Open-Circuit Voltage (Vₒ𝒸)** = {Open_Circuit_Voltage:.2f} V")
 
     with colB:
-        st.success(f"**Imp** = {Imp_T:.2f} A")
-        st.success(f"**Isc** = {Isc_T:.2f} A")
+        st.success(f"**Current at Maximum Power (Iₘₚ)** = {Current_at_Maximum_Power:.2f} A")
+        st.success(f"**Short-Circuit Current (Iₛ𝒸)** = {Short_Circuit_Current:.2f} A")
 
-    # =========================
-    # SAVE FOR ABC PAGE
-    # =========================
-    st.session_state["P_calculated"] = Pout
-    st.session_state["Vmp_T"] = Vmp_T
-    st.session_state["Imp_T"] = Imp_T
-    st.session_state["Voc_T"] = Voc_T
-    st.session_state["Isc_T"] = Isc_T
-    st.session_state["gamma"] = gamma
+    # ================= SAVE FOR ABC =================
+    st.session_state["Output_Power"] = Output_Power
+    st.session_state["Voltage_at_Maximum_Power"] = Voltage_at_Maximum_Power
+    st.session_state["Current_at_Maximum_Power"] = Current_at_Maximum_Power
+    st.session_state["Open_Circuit_Voltage"] = Open_Circuit_Voltage
+    st.session_state["Short_Circuit_Current"] = Short_Circuit_Current
     st.session_state["G_total"] = G_total
+    st.session_state["gamma"] = gamma
 
-    st.info("Values saved. Proceed to the ABC Optimization page.")
+    st.info("All calculated values are saved and ready for ABC Optimization.")
