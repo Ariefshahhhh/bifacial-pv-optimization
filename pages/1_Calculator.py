@@ -103,12 +103,15 @@ if st.button("Calculate Outputs"):
 
     st.write(
         f"7️⃣ Electrical calculations:\n"
-        f"- Isc = Isc_STC × Ftemp,I × Fg × Fclean × Fshade\n"
-        f"- Voc = Voc_STC × Ftemp,V\n"
-        f"- Vmp = Vmp_STC × Ftemp,V\n"
-        f"- Imp = Imp_STC × Ftemp,I × Fg × Fclean × Fshade\n"
-        f"- Pmax = Pmax_STC × Ftemp,P × Fg × Fclean × Fshade × Fmm × Fage"
+        f"- Isc = {Isc_stc:.3f} × {Ftemp_I:.3f} × {Fg:.3f} × {Fclean:.3f} × {Fshade:.3f} = **{Isc:.2f} A**\n"
+        f"- Voc = {Voc_stc:.3f} × {Ftemp_V:.3f} = **{Voc:.2f} V**\n"
+        f"- Vmp = {Vmp_stc:.3f} × {Ftemp_V:.3f} = **{Vmp:.2f} V**\n"
+        f"- Imp = {Imp_stc:.3f} × {Ftemp_I:.3f} × {Fg:.3f} × {Fclean:.3f} × {Fshade:.3f} = **{Imp:.2f} A**\n"
+        f"- Pmax = {Pmax_stc:.1f} × {Ftemp_P:.3f} × {Fg:.3f} × {Fclean:.3f} × {Fshade:.3f} × {Fmm:.3f} × {Fage:.3f} = **{Pmax:.2f} W**"
     )
+
+    st.info("All calculations follow the datasheet-based PV computation formula at module level.")
+
 
 
 
