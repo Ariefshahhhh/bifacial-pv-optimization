@@ -78,7 +78,34 @@ if st.button("Calculate Outputs"):
     st.success(f"Short Circuit Current, **Isc** = {Isc:.2f} A")
 
     st.markdown("### 🧮 Calculation Steps")
-    st.write(f"Rear irradiance = BG × G_front = {BG} × {G_front} = {G_rear:.2f} W/m²")
-    st.write(f"Fg = G_front / 1000 = {Fg:.3f}")
-    st.write(f"Fclean = (100 − dirt)/100 = {Fclean:.3f}")
-    st.write(f"Fage (after {years} years) = {Fage:.3f}")
+    st.write(f"1️⃣ Rear irradiance = BG × G_front = {BG} × {G_front} = **{G_rear:.2f} W/m²**")
+    st.write(f"2️⃣ Total irradiance = G_front + G_rear = **{G_total:.2f} W/m²**")
+
+    st.write(f"3️⃣ Irradiance factor Fg = G_front / 1000 = {G_front} / 1000 = **{Fg:.3f}**")
+
+    st.write(
+        f"4️⃣ Temperature factors:\n"
+        f"- Ftemp,I = 1 + (α/100)(T−25) = **{Ftemp_I:.3f}**\n"
+        f"- Ftemp,V = 1 + (β/100)(T−25) = **{Ftemp_V:.3f}**\n"
+        f"- Ftemp,P = 1 + (γ/100)(T−25) = **{Ftemp_P:.3f}**"
+    )
+
+    st.write(f"5️⃣ Cleaning factor Fclean = (100 − dirt)/100 = (100 − {dirt})/100 = **{Fclean:.3f}**")
+
+    st.write(
+        f"6️⃣ Aging factor Fage:\n"
+        f"- Year 1 degradation = 1.5%\n"
+        f"- Subsequent years = 0.5%/year\n"
+        f"- Total Fage = **{Fage:.3f}**"
+    )
+
+    st.write(
+        f"7️⃣ Electrical calculations:\n"
+        f"- Isc = Isc_STC × Ftemp,I × Fg × Fclean × Fshade\n"
+        f"- Voc = Voc_STC × Ftemp,V\n"
+        f"- Vmp = Vmp_STC × Ftemp,V\n"
+        f"- Imp = Imp_STC × Ftemp,I × Fg × Fclean × Fshade\n"
+        f"- Pmax = Pmax_STC × Ftemp,P × Fg × Fclean × Fshade × Fmm × Fage"
+    )
+
+
