@@ -27,6 +27,8 @@ with col2:
     st.subheader("🌡 Temperature Coefficients")
     alpha = st.number_input("α (Isc coeff, %/°C)", value=0.040, format="%.3f")
     beta  = st.number_input("β (Voc coeff, %/°C)", value=-0.280, format="%.3f")
+    alpha = st.number_input("α (Imp coeff, %/°C)", value=0.040, format="%.3f")
+    beta  = st.number_input("β (Vmp coeff, %/°C)", value=-0.280, format="%.3f")
     gamma = st.number_input("γ (Pmax coeff, %/°C)", value=-0.350, format="%.3f")
 
     st.subheader("⚙ Loss & Correction Factors")
@@ -64,7 +66,7 @@ if st.button("Calculate Outputs"):
     Isc = Isc_stc * Ftemp_I * Fg * Fclean * Fshade
     Voc = Voc_stc * Ftemp_V
     Vmp = Vmp_stc * Ftemp_V
-    Imp = Isc
+    Imp = Imp_stc * Ftemp_I * Fg * Fclean * Fshade
     Pmax = Pmax_stc * Ftemp_P * Fg * Fclean * Fshade * Fmm * Fage
 
     # ------------------ OUTPUT ------------------
@@ -107,5 +109,6 @@ if st.button("Calculate Outputs"):
         f"- Imp = Imp_STC × Ftemp,I × Fg × Fclean × Fshade\n"
         f"- Pmax = Pmax_STC × Ftemp,P × Fg × Fclean × Fshade × Fmm × Fage"
     )
+
 
 
