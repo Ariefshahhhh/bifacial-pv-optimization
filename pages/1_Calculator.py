@@ -1,74 +1,71 @@
 import streamlit as st
 
 st.title("⚡ Bifacial PV Output Computation Tool")
-st.markdown(
-    "Compute **Maximum Power (Pmax)**, **Vmp**, **Imp**, **Voc**, and **Isc** "
-    "based strictly on datasheet values and standard PV correction formulas."
-)
+st.markdown("Computation of **Pmax, Vmp, Imp, Voc, Isc** using datasheet-based bifacial PV formulas.")
 st.markdown("---")
 
-# =========================
-# INPUT LAYOUT
-# =========================
 col1, col2 = st.columns(2)
 
-# ---------- LEFT ----------
+# ---------------- LEFT ----------------
 with col1:
-    st.subheader("📦 STC Electrical Parameters")
+    st.subheader("🔆 Irradiance & Temperature")
 
-    P_stc = st.number_input("Rated Power at STC, Pstc (W)", value=600.0)
-    I_stc = st.number_input("Current at Maximum Power, Istc (A)", value=15.0)
-    V_stc = st.number_input("Voltage at Maximum Power, Vstc (V)", value=40.0)
-    Isc_stc = st.number_input("Short Circuit Current, Isc_STC (A)", value=15.8)
-    Voc_stc = st.number_input("Open Circuit Voltage, Voc_STC (V)", value=48.5)
+    G_front = st.number_input("Front Irradiance, G_front (W/m²)", value=800.0)
+    G_rear  = st.number_input("Rear Irradiance, G_rear (W/m²)", value=120.0)
+    BG      = st.number_input("Bifacial Gain Factor (BG)", value=0.70, format="%.2f")
+    Tmod    = st.number_input("Module Temperature, Tmod (°C)", value=45.0)
 
-    Tmod = st.number_input("Module Temperature, Tmod (°C)", value=45.0)
+    st.subheader("📄 Datasheet Values at STC")
 
-# ---------- RIGHT ----------
+    P_stc  = st.number_input("Pmax_STC (W)", value=610.0)
+    Vmp_stc = st.number_input("Vmp_STC (V)", value=40.61)
+    Imp_stc = st.number_input("Imp_STC (A)", value=15.01)
+    Voc_stc = st.number_input("Voc_STC (V)", value=48.48)
+    Isc_stc = st.number_input("Isc_STC (A)", value=15.80)
+
+# ---------------- RIGHT ----------------
 with col2:
-    st.subheader("🌡 Temperature Coefficients (Datasheet)")
+    st.subheader("🌡 Temperature Coefficients")
 
     alpha = st.number_input("α (Isc coefficient, %/°C)", value=0.045, format="%.3f")
     beta  = st.number_input("β (Voc coefficient, %/°C)", value=-0.230, format="%.3f")
     gamma = st.number_input("γ (Pmax coefficient, %/°C)", value=-0.280, format="%.3f")
 
-    st.subheader("⚙ Correction Factors")
+    st.subheader("⚙ Loss Factors")
 
-    Fg       = st.number_input("Glass / Soiling Factor, Fg", value=0.95, min_value=0.80, max_value=1.00)
-    Fclean   = st.number_input("Cleaning Factor, Fclean", value=0.97, min_value=0.80, max_value=1.00)
-    Funshade = st.number_input("Unshaded Factor, Funshade", value=1.00, min_value=0.80, max_value=1.00)
-    Fmm      = st.number_input("Mismatch Factor, Fmm", value=0.98, min_value=0.80, max_value=1.00)
-    Fdegrad  = st.number_input("Degradation Factor, Fdegrad", value=0.95, min_value=0.80, max_value=1.00)
+    Fclean   = st.number_input("Cleaning Factor, Fclean", value=0.98)
+    Funshade = st.number_input("Unshaded Factor, Funshade", value=1.00)
+    Fmm      = st.number_input("Mismatch Factor, Fmm", value=0.98)
+    Fage     = st.number_input("Aging Factor, Fage", value=0.95)
 
-# =========================
-# CALCULATION
-# =========================
-if st.button("Calculate Outputs"):
+# ---------------- CALCULATION ----------------
+if st.button("Calculate Electrical Outputs"):
 
-    # Temperature correction factors
-    Ftemp_I = 1 + (alpha / 100) * (Tmod - 25)
-    Ftemp_V = 1 + (beta  / 100) * (Tmod - 25)
-    Ftemp_P = 1 + (gamma / 100) * (Tmod - 25)
+    # Effective bifacial irradiance
+    G_eff = G_front + BG * G_rear
+    Fg = G_eff / 1000
 
-    # Outputs based on given formula
-    Pmax = P_stc * Ftemp_P * Fg * Fclean * Funshade * Fmm * Fdegrad
-    Imp  = I_stc * Ftemp_I * Fg * Fclean * Funshade
-    Vmp  = V_stc * Ftemp_V
+    # Temperature factors
+    Ftemp_I = 1 + (alpha/100)*(Tmod - 25)
+    Ftemp_V = 1 + (beta/100)*(Tmod - 25)
+    Ftemp_P = 1 + (gamma/100)*(Tmod - 25)
+
+    # Outputs
+    Pmax = P_stc * Ftemp_P * Fg * Fclean * Funshade * Fmm * Fage
+    Imp  = Imp_stc * Ftemp_I * Fg * Fclean * Funshade
+    Vmp  = Vmp_stc * Ftemp_V
     Isc  = Isc_stc * Ftemp_I * Fg * Fclean * Funshade
     Voc  = Voc_stc * Ftemp_V
 
     st.markdown("---")
-    st.subheader("📊 Computed Electrical Outputs")
+    st.subheader("📊 Computed Outputs (Bifacial PV)")
 
     colA, colB = st.columns(2)
-
     with colA:
         st.success(f"**Maximum Power, Pmax** = {Pmax:.2f} W")
-        st.success(f"**Voltage at Maximum Power, Vmp** = {Vmp:.2f} V")
+        st.success(f"**Voltage at Pmax, Vmp** = {Vmp:.2f} V")
         st.success(f"**Open Circuit Voltage, Voc** = {Voc:.2f} V")
 
     with colB:
-        st.success(f"**Current at Maximum Power, Imp** = {Imp:.2f} A")
+        st.success(f"**Current at Pmax, Imp** = {Imp:.2f} A")
         st.success(f"**Short Circuit Current, Isc** = {Isc:.2f} A")
-
-    st.info("All results are computed strictly according to standard PV correction equations.")
