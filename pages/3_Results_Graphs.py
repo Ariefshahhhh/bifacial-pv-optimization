@@ -6,6 +6,7 @@ st.markdown("---")
 
 if "P_optimized" not in st.session_state:
     st.warning("⚠️ No optimization results available. Run ABC Optimization first.")
+    st.warning("⚠️ Coming Soon.....")
     st.stop()
 
 P_measured = st.session_state["P_measured"]
@@ -42,3 +43,4 @@ ax2.set_ylabel("Absolute Error (W)")
 ax2.set_title("Error Reduction")
 ax2.grid(axis="y", linestyle="--")
 st.pyplot(fig2)
+
