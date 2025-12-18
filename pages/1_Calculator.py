@@ -25,15 +25,10 @@ with col1:
 # ---------- RIGHT ----------
 with col2:
     st.subheader("🌡 Temperature Coefficients")
-    alpha = st.number_input("α (Isc/Imp coeff, %/°C)", value=0.040, format="%.3f")
+    alpha = st.number_input("α (Isc coeff, %/°C)", value=0.040, format="%.3f")
     beta  = st.number_input("β (Voc coeff, %/°C)", value=-0.280, format="%.3f")
-
-    beta_vmp = st.number_input(
-        "β (Vmp coeff, %/°C) – leave as 0 if not given",
-        value=0.000,
-        format="%.3f"
-    )
-
+    alpha = st.number_input("α (Imp coeff, %/°C)", value=0.040, format="%.3f")
+    beta  = st.number_input("β (Vmp coeff, %/°C)", value=-0.280, format="%.3f")
     gamma = st.number_input("γ (Pmax coeff, %/°C)", value=-0.350, format="%.3f")
 
 
@@ -63,9 +58,6 @@ if st.button("Calculate Outputs"):
         Fage = 1.0
     else:
         Fage = 1 - 0.015 - 0.005 * (years - 1)
-
-    # Use Pmax coefficient for Vmp if Vmp coefficient is not provided
-    beta_vmp_eff = beta_vmp if beta_vmp != 0 else gamma
 
 
     # Temperature factors
@@ -134,6 +126,7 @@ if st.button("Calculate Outputs"):
     )
 
     st.info("All calculations follow the datasheet-based PV computation formula at module level.")
+
 
 
 
