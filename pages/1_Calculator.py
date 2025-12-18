@@ -69,6 +69,14 @@ if st.button("Calculate Outputs"):
     Imp = Imp_stc * Ftemp_I * Fg * Fclean * Fshade
     Pmax = Pmax_stc * Ftemp_P * Fg * Fclean * Fshade * Fmm * Fage
 
+    # --- SAVE FOR ABC (THIS IS THE KEY PART) ---
+    # --- SAVE FOR ABC (THIS IS THE KEY PART) ---
+    st.session_state["Pmax_calc"] = Pmax
+    st.session_state["Isc_calc"] = Isc
+    st.session_state["Voc_calc"] = Voc
+    st.session_state["Vmp_calc"] = Vmp
+    st.session_state["Imp_calc"] = Imp
+
     # ------------------ OUTPUT ------------------
     st.markdown("---")
     st.subheader("📊 Calculated Electrical Outputs (Module Level)")
@@ -111,6 +119,7 @@ if st.button("Calculate Outputs"):
     )
 
     st.info("All calculations follow the datasheet-based PV computation formula at module level.")
+
 
 
 
