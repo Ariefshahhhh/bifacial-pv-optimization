@@ -25,11 +25,18 @@ with col1:
 # ---------- RIGHT ----------
 with col2:
     st.subheader("🌡 Temperature Coefficients")
-    alpha = st.number_input("α (Isc coeff, %/°C)", value=0.040, format="%.3f")
+    alpha = st.number_input("α (Isc/Imp coeff, %/°C)", value=0.040, format="%.3f")
     beta  = st.number_input("β (Voc coeff, %/°C)", value=-0.280, format="%.3f")
-    alpha = st.number_input("α (Imp coeff, %/°C)", value=0.040, format="%.3f")
-    beta  = st.number_input("β (Vmp coeff, %/°C)", value=-0.280, format="%.3f")
+
+    beta_vmp = st.number_input(
+        "β (Vmp coeff, %/°C) – leave as 0 if not given",
+        value=0.000,
+        format="%.3f"
+    )
+
     gamma = st.number_input("γ (Pmax coeff, %/°C)", value=-0.350, format="%.3f")
+
+
 
     st.subheader("⚙ Loss & Correction Factors")
     dirt = st.number_input("Dirt Level (%)", value=5.0)
@@ -57,6 +64,10 @@ if st.button("Calculate Outputs"):
     else:
         Fage = 1 - 0.015 - 0.005 * (years - 1)
 
+    # Use Pmax coefficient for Vmp if Vmp coefficient is not provided
+    beta_vmp_eff = beta_vmp if beta_vmp != 0 else gamma
+
+
     # Temperature factors
     Ftemp_I = 1 + (alpha / 100) * (Tcell - 25)
     Ftemp_V = 1 + (beta  / 100) * (Tcell - 25)
@@ -65,7 +76,7 @@ if st.button("Calculate Outputs"):
     # Electrical outputs
     Isc = Isc_stc * Ftemp_I * Fg * Fclean * Fshade
     Voc = Voc_stc * Ftemp_V
-    Vmp = Vmp_stc * Ftemp_V
+    Vmp = Vmp_stc * (1 + (beta_vmp_eff / 100) * (Tcell - 25))
     Imp = Imp_stc * Ftemp_I * Fg * Fclean * Fshade
     Pmax = Pmax_stc * Ftemp_P * Fg * Fclean * Fshade * Fmm * Fage
 
@@ -123,6 +134,7 @@ if st.button("Calculate Outputs"):
     )
 
     st.info("All calculations follow the datasheet-based PV computation formula at module level.")
+
 
 
 
